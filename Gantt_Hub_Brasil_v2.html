@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gantt Hub Brasil — Modelo</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --bg:#f4f5f8; --panel:#ffffff; --panel-2:#eef0f5; --line:#dde0e8;
+  --txt:#1d2233; --txt-dim:#5b6276; --txt-faint:#969cb0;
+  --green:#1f9d57; --green-bg:#e3f5ea;
+  --amber:#c98a14; --amber-bg:#fbf0d8;
+  --red:#d4453d; --red-bg:#fbe4e3;
+  --blue:#2563eb; --accent:#0fae9e;
+  --proc:#6b4ef0; --proc-bg:#ece8ff;
+  --row-h:34px; --col-w:46px; --side-w:380px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--txt);font-size:13px;overflow:hidden}
+
+/* ── TOPBAR ── */
+.topbar{height:54px;display:flex;align-items:center;gap:16px;padding:0 18px;background:var(--panel);border-bottom:1px solid var(--line)}
+.brand{font-weight:700;font-size:14px;letter-spacing:.04em;display:flex;align-items:center;gap:8px}
+.brand .pip{width:8px;height:8px;border-radius:2px;background:var(--accent)}
+.brand small{color:var(--txt-dim);font-weight:400;font-size:11px}
+.topbar .spacer{flex:1}
+.btn{font-family:inherit;font-size:12px;font-weight:600;color:var(--txt);background:var(--panel-2);border:1px solid var(--line);padding:7px 13px;border-radius:7px;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.06);color:#fff}
+
+/* ── LAYOUT ── */
+.wrap{display:flex;height:calc(100vh - 54px)}
+.filters{width:230px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--line);overflow-y:auto;padding:16px 14px}
+.filters h3{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt-faint);margin:18px 0 9px}
+.filters h3:first-child{margin-top:0}
+.fopt{display:flex;align-items:center;gap:8px;padding:5px 7px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--txt-dim);transition:.12s}
+.fopt:hover{background:var(--panel-2);color:var(--txt)}
+.fopt input{accent-color:var(--accent);width:14px;height:14px;cursor:pointer}
+.fopt .sw{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.fopt.on{color:var(--txt)}
+.legend{margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
+.legend .li{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--txt-dim);margin-bottom:7px}
+.legend .dot{width:10px;height:10px;border-radius:3px}
+
+/* ── GANTT ── */
+.gantt{flex:1;overflow:auto;position:relative}
+.gtable{position:relative;min-width:max-content}
+.ghead{display:flex;position:sticky;top:0;z-index:30;background:var(--panel);border-bottom:1px solid var(--line)}
+.gcorner{width:var(--side-w);flex-shrink:0;position:sticky;left:0;z-index:31;background:var(--panel);border-right:1px solid var(--line);display:flex;align-items:center;padding:0 14px;height:46px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt-faint);font-weight:600}
+.gmonths{display:flex;flex-direction:column}
+.gmonth-row{display:flex;height:23px}
+.gweek-row{display:flex;height:23px}
+.gmonth{border-right:1px solid var(--line);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--txt-dim);display:flex;align-items:center;justify-content:center;background:var(--panel-2)}
+.gweek{width:var(--col-w);flex-shrink:0;border-right:1px solid var(--line);font-size:9px;color:var(--txt-faint);display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.1}
+.gweek.today{background:rgba(43,214,200,.12)}
+
+.gbody{position:relative}
+.grow{display:flex;height:var(--row-h);border-bottom:1px solid var(--line);position:relative}
+.grow:hover{background:rgba(15,174,158,.04)}
+.gside{width:var(--side-w);flex-shrink:0;position:sticky;left:0;z-index:20;background:var(--panel);border-right:1px solid var(--line);display:flex;align-items:center;gap:7px;padding:0 12px;overflow:hidden}
+.grow:hover .gside{background:#f0fbfa}
+
+.row-phase .gside{background:var(--panel-2);font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--proc)}
+.row-phase{background:var(--panel-2)}
+.row-proc .gside{font-weight:600;color:var(--txt)}
+.row-proc{background:rgba(107,78,240,.045)}
+.row-task .gside{padding-left:34px}
+.row-phase .sidelabel,.row-proc .sidelabel{cursor:pointer}
+.row-phase .sidelabel:hover,.row-proc .sidelabel:hover{text-decoration:underline}
+.edit-ico{font-size:11px;color:var(--txt-faint);cursor:pointer;flex-shrink:0;opacity:0;transition:.12s;padding:2px}
+.grow:hover .edit-ico{opacity:1}
+.edit-ico:hover{color:var(--accent)}
+
+.caret{width:15px;height:15px;flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--txt-dim);font-size:9px;transition:.15s;user-select:none}
+.caret:hover{color:var(--txt)}
+.caret.collapsed{transform:rotate(-90deg)}
+.caret.leaf{visibility:hidden}
+.sidelabel{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:default}
+.row-task .sidelabel{color:var(--txt-dim);font-size:12px}
+.sbadge{font-size:9px;padding:2px 6px;border-radius:4px;font-weight:600;flex-shrink:0;font-family:'IBM Plex Mono',monospace}
+.sb-green{background:var(--green-bg);color:var(--green)}
+.sb-amber{background:var(--amber-bg);color:var(--amber)}
+.sb-red{background:var(--red-bg);color:var(--red)}
+.resp{font-size:10px;color:var(--txt-faint);flex-shrink:0;max-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'IBM Plex Mono',monospace}
+
+.gtrack{flex:1;position:relative;display:flex}
+.gcell{width:var(--col-w);flex-shrink:0;border-right:1px solid rgba(38,43,58,.5)}
+.gcell.today{background:rgba(43,214,200,.07)}
+.gcell.weekend{}
+.today-line{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);z-index:15;pointer-events:none}
+
+.bar{position:absolute;height:20px;top:7px;border-radius:5px;display:flex;align-items:center;padding:0 8px;font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;cursor:grab;z-index:10;box-shadow:0 1px 3px rgba(30,40,80,.18);transition:filter .12s}
+.bar:hover{filter:brightness(1.06);z-index:12}
+.bar:active{cursor:grabbing}
+.bar.b-green{background:linear-gradient(180deg,#34c172,#1f9d57);color:#fff}
+.bar.b-amber{background:linear-gradient(180deg,#e7af33,#c98a14);color:#fff}
+.bar.b-red{background:linear-gradient(180deg,#e5635b,#d4453d);color:#fff}
+.bar.b-proc{background:repeating-linear-gradient(45deg,#6b4ef0,#6b4ef0 6px,#5a3fd6 6px,#5a3fd6 12px);color:#fff;height:12px;top:11px;border-radius:3px;font-size:0}
+.bar.b-phase{background:rgba(15,174,158,.16);border:1px solid rgba(15,174,158,.45);color:var(--accent);height:10px;top:12px;border-radius:2px;font-size:0;box-shadow:none;cursor:default}
+.bar .grip{position:absolute;top:0;bottom:0;width:7px;cursor:ew-resize;opacity:0}
+.bar:hover .grip{opacity:1}
+.bar .grip.l{left:0}.bar .grip.r{right:0}
+.bar .grip::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:2px;height:9px;background:rgba(255,255,255,.6);border-radius:2px}
+.dep-line{position:absolute;pointer-events:none;z-index:8}
+.dep-line path{stroke:var(--txt-faint);stroke-width:1.4;fill:none;stroke-dasharray:3 3;opacity:.5}
+
+/* ── EDIT PANEL ── */
+.editor{position:fixed;top:0;right:-460px;width:460px;height:100vh;background:var(--panel);border-left:1px solid var(--line);z-index:200;transition:right .25s cubic-bezier(.4,0,.2,1);overflow-y:auto;box-shadow:-12px 0 40px rgba(30,40,80,.16)}
+.editor.open{right:0}
+.ed-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--panel);z-index:2}
+.ed-head h2{font-size:15px;font-weight:700}
+.ed-close{cursor:pointer;color:var(--txt-dim);font-size:20px;line-height:1;background:none;border:none}
+.ed-close:hover{color:var(--txt)}
+.ed-body{padding:20px}
+.fld{margin-bottom:16px}
+.fld label{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt-faint);margin-bottom:6px;font-weight:600}
+.fld input,.fld select,.fld textarea{width:100%;font-family:inherit;font-size:13px;background:var(--panel-2);border:1px solid var(--line);color:var(--txt);padding:9px 11px;border-radius:7px;outline:none}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--accent)}
+.fld textarea{resize:vertical;min-height:60px}
+.fld .row2{display:flex;gap:10px}
+.fld .row2>div{flex:1}
+.ed-actions{display:flex;gap:10px;margin-top:8px}
+.ed-actions .btn{flex:1;justify-content:center;padding:10px}
+.btn.danger{background:var(--red-bg);border-color:#5a2a2a;color:var(--red)}
+.btn.danger:hover{filter:brightness(1.15)}
+
+/* import modal */
+.modal-bg{position:fixed;inset:0;background:rgba(30,40,80,.45);z-index:300;display:none;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:12px;width:560px;max-width:92vw;padding:24px}
+.modal h2{font-size:16px;margin-bottom:6px}
+.modal p{font-size:12px;color:var(--txt-dim);margin-bottom:14px;line-height:1.5}
+.modal textarea{width:100%;height:200px;font-family:'IBM Plex Mono',monospace;font-size:11px;background:var(--bg);border:1px solid var(--line);color:var(--txt);padding:12px;border-radius:8px;resize:vertical}
+.modal .ed-actions{margin-top:16px}
+.hint{font-size:11px;color:var(--txt-faint);background:var(--panel-2);padding:10px 12px;border-radius:7px;margin-bottom:14px;line-height:1.5;border-left:2px solid var(--accent)}
+.empty{padding:40px;text-align:center;color:var(--txt-faint);font-size:13px}
+.combo{display:flex;gap:8px}
+.combo select,.combo input{flex:1;min-width:0}
+.combo-add{background:var(--panel-2);border:1px solid var(--line);color:var(--txt-dim);border-radius:7px;padding:0 12px;cursor:pointer;font-size:15px;font-family:inherit;flex-shrink:0;font-weight:600}
+.combo-add:hover{border-color:var(--accent);color:var(--accent)}
+.ed-section{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt-faint);font-weight:700;margin:22px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.ed-section:first-child{margin-top:0}
+.note-box{font-size:11px;color:var(--txt-dim);background:var(--panel-2);border-left:2px solid var(--accent);padding:9px 11px;border-radius:6px;margin-bottom:16px;line-height:1.5}
+
+/* === NIVEL ÁREA (nuevo) === */
+.row-area .gside{background:#f6f4ff;font-weight:700;color:var(--accent);font-size:12px;border-left:3px solid var(--accent)}
+.row-area{background:#fafbff}
+.row-area .sidelabel{cursor:pointer}
+.row-area .sidelabel:hover{text-decoration:underline}
+.row-area{padding-left:0}
+.row-area .gside{padding-left:18px}
+.row-proc .gside{padding-left:24px}
+.row-task .gside{padding-left:44px}
+.bar.b-area{background:linear-gradient(180deg,#0fae9e,#0a8c7e);height:14px;top:10px;color:#fff;border-radius:3px;font-size:0;box-shadow:none}
+
+/* === RUTA CRÍTICA (nuevo) === */
+.critbadge{font-size:8.5px;font-weight:800;padding:2px 5px;border-radius:3px;background:#fee5d3;color:#c04f17;letter-spacing:.06em;border:1px solid #f6c294;flex-shrink:0;font-family:'IBM Plex Mono',monospace}
+.pctbadge{font-size:9.5px;font-weight:700;color:var(--txt-dim);background:var(--panel-2);padding:2px 6px;border-radius:3px;font-family:'IBM Plex Mono',monospace;flex-shrink:0}
+.bar.bar-crit{outline:2px solid #ee6c2d;outline-offset:1px;box-shadow:0 0 0 3px rgba(238,108,45,.15),0 1px 3px rgba(30,40,80,.2)}
+.bar.bar-crit::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#ee6c2d}
+
+/* === CADENA RESALTADA (nuevo) === */
+.chain-hi{outline:2px solid #ee6c2d!important;z-index:13!important}
+.grow.chain-hi .gside{background:#fff5ee!important;box-shadow:inset 3px 0 0 #ee6c2d}
+
+/* === PANEL CRÍTICO (nuevo) === */
+.crit-card{background:#fff5ee;border:1px solid #f6c294;border-radius:9px;padding:14px;margin-bottom:8px}
+.crit-row{display:flex;gap:10px;font-size:12px;padding:5px 0;border-bottom:1px dashed #e9d4be;align-items:baseline}
+.crit-row:last-child{border-bottom:0}
+.crit-lab{color:#9c6731;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;min-width:140px;flex-shrink:0}
+.chain-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:11px 13px;margin-bottom:8px;cursor:pointer;transition:.12s}
+.chain-card:hover{border-color:var(--accent);background:#f7fbfb}
+.chain-top{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.chain-id{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txt-faint);font-weight:700;background:var(--panel-2);padding:1px 5px;border-radius:3px}
+.chain-task{font-size:12px;font-weight:600;color:var(--txt);line-height:1.35}
+.chain-meta{font-size:10px;color:var(--txt-faint);margin-top:4px}
+.empty-mini{font-size:11px;color:var(--txt-faint);padding:8px 0;text-align:center;font-style:italic}
+.ro{padding:9px 11px;background:var(--panel-2);border-radius:6px;font-size:12px;color:var(--txt);line-height:1.55;border:1px solid var(--line)}
+
+/* === LEGEND OWNERS POR ÁREA === */
+.legend .li{align-items:flex-start}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><span class="pip"></span> Gantt Hub Brasil <small>· Weekly Tracking · 95 actividades</small></div>
+  <div class="spacer"></div>
+  <button class="btn" onclick="collapseAll()">⊟ Colapsar</button>
+  <button class="btn" onclick="expandAll()">⊞ Expandir</button>
+  <button class="btn" onclick="openImport()">⇪ Cargar datos</button>
+  <button class="btn primary" onclick="addTask()">＋ Nueva tarea</button>
+</div>
+
+<div class="wrap">
+  <aside class="filters" id="filters"></aside>
+  <main class="gantt" id="gantt"></main>
+</div>
+
+<div class="editor" id="editor">
+  <div class="ed-head"><h2 id="edTitle">Editar tarea</h2><button class="ed-close" onclick="closeEditor()">×</button></div>
+  <div class="ed-body" id="edBody"></div>
+</div>
+
+<div class="modal-bg" id="importModal">
+  <div class="modal">
+    <h2>Cargar información</h2>
+    <p>Pegá filas de la solapa <b>Master</b> en formato CSV o tabulado. Columnas esperadas:<br>
+    <code style="color:var(--accent);font-size:11px">ID, Fase, Area, Proceso, Tarea, Responsable, Dependencias, Inicio, Fin, Criticidad, Status</code><br>
+    Las fechas en formato <code style="color:var(--accent)">AAAA-MM-DD</code>. Si una tarea no tiene fechas, se le asigna una semana por defecto que después podés ajustar arrastrando la barra.</p>
+    <textarea id="importText" placeholder="0.1	FASE 0	Legales	Constitucion de la empresa	Elaboración de poderes	Veirano		2026-05-18	2026-05-25	Verde	Completada"></textarea>
+    <div class="ed-actions">
+      <button class="btn danger" onclick="closeImport()">Cancelar</button>
+      <button class="btn" onclick="replaceImport()">Reemplazar todo</button>
+      <button class="btn primary" onclick="appendImport()">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════ DATOS DE MUESTRA (extraídos del Excel) ════════
+   Modelo: derivamos fechas de la Kanban (⏱ = Fin). Inicio estimado
+   para que se vean barras. Todo es editable. */
+const STATUS_MAP = {
+  'Completada':'green','Ok':'green','OK':'green',
+  'En curso':'amber','Parcial':'amber',
+  'Pendiente':'red','Bloqueada':'red'
+};
+const CRIT_COLOR = { 'Verde':'green','Amarillo':'amber','Rojo':'red','Media':'amber','Baja':'green','Alta':'red' };
+
+let DATA = [
+  {id:"A001", phase:"PRE", area:"Finanzas / Holdings", proc:"Viabilidad y modelo financiero", task:"Evaluación de la viabilidad del Hub en el pais de destino (Brasil)", resp:"Gestión de Holdings / Billy Aperrigue", prio:"Media", status:"Completada", pct:"100%", dep:"EY, Contabilidad, Tributación", risk:"Implementación del Hub, Armado del BC", next:"Se incluyó servicio de consultoría + análisis s/ precios de transferencia", crit:"Importante", start:"2025-03-01", end:"2025-06-01"},
+  {id:"A002", phase:"PRE", area:"Legal / Societario", proc:"Constitución de la empresa", task:"Elaboración de poderes de GC y Andre Rezende para NewCo", resp:"Legal / Veirano", prio:"Alta", status:"Completada", pct:"100%", dep:"Legales, Secretaría", risk:"Habilita los siguientes pasos para la creación de la empresa", next:"", crit:"", start:"2026-04-01", end:"2026-04-30"},
+  {id:"A003", phase:"PRE", area:"Legal / Societario", proc:"Constitución de la empresa", task:"Verificación CNAE (categoría profesional/económica)", resp:"Legal / Veirano", prio:"Media", status:"Completada", pct:"100%", dep:"Legal, RRLL", risk:"Habilita los siguientes pasos para la creación de la empresa", next:"", crit:"", start:"2026-04-01", end:"2026-04-30"},
+  {id:"A004", phase:"PRE", area:"Legal / Societario", proc:"Constitución de la empresa", task:"Contratación del Officer Local en Brasil (representación legal y domicilio virtual)", resp:"Mobility / Legales", prio:"Alta", status:"En curso", pct:"50%", dep:"Procesos internos GC, Cumplimiento, Legales", risk:"Habilita el proceso de creación de la NewCo", next:"Pendiente iniciar registro del proveedor y validación de riesgos no financieros", crit:"CRÍTICA", start:"2026-05-01", end:"2026-06-15"},
+  {id:"A005", phase:"PRE", area:"Liderazgo / Gobierno", proc:"Gobierno y modelo operativo", task:"Representante legal: 2da opción y gestión de poderes (asignar a Legales)", resp:"Legales", prio:"Media", status:"Pendiente", pct:"0%", dep:"RRLL/Memo, precedente Ventive + timing del proceso en Brasil", risk:"Responsable corporativo (Memo) / Responsable GDH. Etapa constitución vs ongoing", next:"Potenciales personas para RL. Desarrollo y Compensa validar s/ los Tops", crit:"Importante", start:"2026-05-15", end:"2026-06-20"},
+  {id:"A006", phase:"PRE", area:"Liderazgo / Gobierno", proc:"Gobierno y modelo operativo", task:"Definir rol del Director / Gerente Gral de Finnova (actividades, aprobaciones, coord. proveedor)", resp:"Validar con Billy", prio:"Media", status:"Pendiente", pct:"0%", dep:"", risk:"Figura oficial vs representación/administración - consecuencias", next:"", crit:"Importante", start:"2026-05-15", end:"2026-06-20"},
+  {id:"A007", phase:"PRE", area:"Legal / Societario", proc:"Documentación y apostilla", task:"Notarización y apostillado de documentos clave para CNPJ", resp:"Legal / Secretaría", prio:"Alta", status:"Completada", pct:"100%", dep:"Secretaría", risk:"Demoras en solicitud del CNPJ para iniciar la NewCo", next:"Se envió el documento pendiente apostillado a Brasil 25/05", crit:"CRÍTICA", start:"2026-04-01", end:"2026-05-25"},
+  {id:"A008", phase:"PRE", area:"Finanzas / Holdings", proc:"Cuenta bancaria y pagos", task:"Apertura de Cuenta Bancaria (local Brasil)", resp:"Finanzas + Proveedor Local", prio:"Alta", status:"Pendiente", pct:"0%", dep:"Finanzas, entidades financieras locales, proveedor externo", risk:"Inhabilita el inicio de operaciones y pagos locales", next:"A la espera del CNPJ y contratación de proveedor externo para iniciar el proceso", crit:"CRÍTICA", start:"2026-06-15", end:"2026-07-15"},
+  {id:"A009", phase:"PRE", area:"Legal / Societario", proc:"Constitución de la empresa", task:"Registro CDNR y CNPJ (x2)", resp:"Veirano", prio:"Alta", status:"Pendiente", pct:"0%", dep:"Documentación enviada GC", risk:"No inicio de operaciones ni registros en entidades locales", next:"", crit:"CRÍTICA", start:"2026-05-25", end:"2026-06-15"},
+  {id:"A010", phase:"PRE", area:"Legal / Societario", proc:"Constitución de la empresa", task:"Obtención CNPJ", resp:"Veirano", prio:"Alta", status:"Pendiente", pct:"0%", dep:"", risk:"Agregar fechas. Inhabilita otros procesos", next:"", crit:"CRÍTICA", start:"2026-06-01", end:"2026-06-30"},
+  {id:"A011", phase:"PRE", area:"Legal / Societario", proc:"Documentación y apostilla", task:"Traducción Jurada de documentación de la NewCo", resp:"Veirano + proveedor", prio:"Alta", status:"En curso", pct:"25%", dep:"Documentación enviada GC", risk:"", next:"", crit:"", start:"2026-05-15", end:"2026-06-15"},
+  {id:"A012", phase:"PRE", area:"Legal / Societario", proc:"Registros post-constitución", task:"Registro Documentos Brasil (validar cuáles)", resp:"Veirano", prio:"Media", status:"Pendiente", pct:"0%", dep:"", risk:"", next:"", crit:"", start:"2026-06-15", end:"2026-07-15"},
+  {id:"A013", phase:"PRE", area:"Legal / Societario", proc:"Constitución de la empresa", task:"Certificado de GC como Beneficiario Final de la NewCo", resp:"Veirano", prio:"Media", status:"Pendiente", pct:"0%", dep:"", risk:"", next:"", crit:"", start:"2026-05-25", end:"2026-06-30"},
+  {id:"A014", phase:"PRE", area:"Legal / Societario", proc:"Constitución de la empresa", task:"Cumplimiento del Beneficiario Final (GC)", resp:"Veirano", prio:"Media", status:"Pendiente", pct:"0%", dep:"", risk:"", next:"", crit:"", start:"2026-05-25", end:"2026-06-30"},
+  {id:"A015", phase:"PRE", area:"Legal / Societario", proc:"Constitución de la empresa", task:"Validación nombre de la NewCo", resp:"Veirano", prio:"Media", status:"Pendiente", pct:"0%", dep:"", risk:"", next:"", crit:"", start:"2026-05-15", end:"2026-06-15"},
+  {id:"A016", phase:"PRE", area:"Legal / Societario", proc:"Constitución de la empresa", task:"Redacción y Firma estatuto de la NewCo", resp:"Veirano", prio:"Media", status:"En curso", pct:"35%", dep:"", risk:"", next:"", crit:"", start:"2026-05-15", end:"2026-06-30"},
+  {id:"A017", phase:"LIVE", area:"Legal / Societario", proc:"Registros post-constitución", task:"Inscripciones municipales + Registro SISBACEN", resp:"Veirano + NewCo", prio:"Media", status:"Pendiente", pct:"0%", dep:"", risk:"", next:"", crit:"", start:"2026-06-30", end:"2026-07-31"},
+  {id:"A018", phase:"LIVE", area:"Legal / Societario", proc:"Registros post-constitución", task:"Registros FGTS e INSS", resp:"Veirano / NewCo", prio:"Media", status:"Pendiente", pct:"0%", dep:"", risk:"", next:"", crit:"", start:"2026-06-30", end:"2026-07-31"},
+  {id:"A019", phase:"PRE", area:"Relaciones Laborales", proc:"Marco laboral y sindical", task:"Definición contribución sindical, asistencia/negociación, patronal", resp:"Relaciones Laborales / Veirano", prio:"Media", status:"Pendiente", pct:"0%", dep:"", risk:"", next:"", crit:"", start:"2026-06-01", end:"2026-06-30"},
+  {id:"A020", phase:"PRE", area:"Relaciones Laborales", proc:"Marco laboral y sindical", task:"Consulta y adaptación al convénio colectivo vigente (beneficios mínimos y pisos)", resp:"Relaciones Laborales; Veirano; Beneficios", prio:"Media", status:"En curso", pct:"20%", dep:"Beneficios y RRLL", risk:"Incumplimiento de normativa vigente", next:"Reunión entre RRLL y Beneficios para implementación", crit:"Importante", start:"2026-05-20", end:"2026-06-30"},
+  {id:"A021", phase:"PRE", area:"Finanzas / Holdings", proc:"Viabilidad y modelo financiero", task:"Envío de lineamientos de modelo de gestión operativo para el HUB", resp:"Billy Aperrigue", prio:"Media", status:"Completada", pct:"100%", dep:"", risk:"", next:"", crit:"Importante", start:"2026-04-01", end:"2026-05-01"},
+  {id:"A022", phase:"PRE", area:"Finanzas / Holdings", proc:"Cuenta bancaria y pagos", task:"Gestión de pagos requeridos del Hub en fase inicial", resp:"Billy Aperrigue", prio:"Media", status:"En curso", pct:"75%", dep:"", risk:"", next:"", crit:"", start:"2026-04-15", end:"2026-06-30"},
+  {id:"A023", phase:"PRE", area:"Finanzas / Holdings", proc:"Cuenta bancaria y pagos", task:"Gestión de fondos para el funcionamiento del Hub", resp:"Billy Aperrigue", prio:"Media", status:"En curso", pct:"50%", dep:"Apertura de Cuenta Bancaria", risk:"Habilitación de la NewCo", next:"Aprobación del fondeo en Comité BAP", crit:"Importante", start:"2026-05-01", end:"2026-06-30"},
+  {id:"A024", phase:"PRE", area:"Liderazgo / Gobierno", proc:"Gobierno y modelo operativo", task:"Definir gobierno de roles y operatividad, flujos por área", resp:"Billy / Stakeholders", prio:"Media", status:"En curso", pct:"35%", dep:"", risk:"Funcionamiento del Hub", next:"Reunión 28/05 con Billy para diagramar cada proceso", crit:"CRÍTICA", start:"2026-05-28", end:"2026-06-15"},
+  {id:"A025", phase:"PRE", area:"Relaciones Laborales", proc:"Marco laboral y sindical", task:"Definición del marco laboral, legal y tributario del HUB", resp:"Relaciones Laborales", prio:"Media", status:"Completada", pct:"100%", dep:"", risk:"", next:"", crit:"CRÍTICA", start:"2026-04-01", end:"2026-05-15"},
+  {id:"A026", phase:"PRE", area:"Relaciones Laborales", proc:"Marco laboral y sindical", task:"Definición de Sindicato que aplica a la NewCo según objeto social", resp:"Relaciones Laborales", prio:"Media", status:"En curso", pct:"75%", dep:"", risk:"Proceso de desafiliación, RRLL responsables", next:"", crit:"Importante", start:"2026-05-01", end:"2026-05-29"},
+  {id:"A027", phase:"PRE", area:"Relaciones Laborales", proc:"Marco laboral y sindical", task:"Alinear cronograma de actividades al sindicato", resp:"Relaciones Laborales", prio:"Media", status:"En curso", pct:"25%", dep:"", risk:"", next:"Se envió cronograma y fecha de entregables", crit:"", start:"2026-05-26", end:"2026-06-05"},
+  {id:"A028", phase:"PRE", area:"Relaciones Laborales", proc:"Marco laboral y sindical", task:"Evaluación de riesgos y validación de documentos para ICP Brasil", resp:"Relaciones Laborales / Compensaciones", prio:"Media", status:"En curso", pct:"85%", dep:"", risk:"Nómina y Compensa", next:"Definir movimientos credicorp - operativa y cuenta bancaria", crit:"", start:"2026-05-01", end:"2026-06-15"},
+  {id:"A029", phase:"PRE", area:"Relaciones Laborales", proc:"Marco laboral y sindical", task:"Validación con Veirano sobre aplicación del PLR en Brasil", resp:"Relaciones Laborales", prio:"Media", status:"Completada", pct:"100%", dep:"", risk:"", next:"", crit:"", start:"2026-04-15", end:"2026-05-20"},
+  {id:"A030", phase:"PRE", area:"Relaciones Laborales", proc:"Marco laboral y sindical", task:"Recomendaciones finales sobre ILP/PLR", resp:"Relaciones Laborales / Compensaciones", prio:"Media", status:"En curso", pct:"80%", dep:"", risk:"Nómina y Compensa", next:"Ver política de ILP en Brasil", crit:"", start:"2026-05-01", end:"2026-06-05"},
+  {id:"A031", phase:"PRE", area:"Relaciones Laborales", proc:"Marco laboral y sindical", task:"Recomendaciones finales para la implementación del Hub Brasil", resp:"Relaciones Laborales", prio:"Alta", status:"Completada", pct:"100%", dep:"", risk:"", next:"", crit:"", start:"2026-04-15", end:"2026-05-25"},
+  {id:"A032", phase:"PRE", area:"Relaciones Laborales", proc:"Proceso de alta CLT", task:"Modelos de contratos validados para traspaso TRI", resp:"Relaciones Laborales", prio:"Media", status:"En curso", pct:"80%", dep:"", risk:"", next:"", crit:"", start:"2026-05-01", end:"2026-06-05"},
+  {id:"A033", phase:"PRE", area:"Relaciones Laborales", proc:"Proceso de alta CLT", task:"Contratos de Personal: deadline a RRLL sobre formatos aprobados", resp:"Mobility", prio:"Alta", status:"Completada", pct:"100%", dep:"", risk:"Validar periodo de prueba", next:"Se envió correo 26/05 con fechas", crit:"", start:"2026-05-21", end:"2026-05-26"},
+  {id:"A034", phase:"PRE", area:"Relaciones Laborales", proc:"Proceso de alta CLT", task:"Record Crediticio: ¿se puede solicitar o no? Validar con RRLL", resp:"Relaciones Laborales", prio:"Media", status:"En curso", pct:"25%", dep:"", risk:"", next:"", crit:"", start:"2026-05-15", end:"2026-05-29"},
+  {id:"A035", phase:"LIVE", area:"Relaciones Laborales", proc:"Proceso de alta CLT", task:"Redacción de contratos de trabajo CLT (ley local)", resp:"GDH", prio:"Media", status:"Pendiente", pct:"0%", dep:"Relaciones Laborales", risk:"Contratación Local de la nómina TRI", next:"Thalia / Gaby para contratos", crit:"", start:"2026-06-01", end:"2026-06-30"},
+  {id:"A036", phase:"PRE", area:"Relaciones Laborales", proc:"Proceso de cese TRI", task:"Listado de documentación requerida para traspaso (cese/alta)", resp:"RRLL + GDH", prio:"Alta", status:"En curso", pct:"80%", dep:"", risk:"", next:"", crit:"", start:"2026-05-01", end:"2026-06-12"},
+  {id:"A037", phase:"PRE", area:"Relaciones Laborales", proc:"Proceso de cese TRI", task:"Check list traspaso de AFP a Brasil (previo a EY)", resp:"Relaciones Laborales", prio:"Media", status:"En curso", pct:"50%", dep:"", risk:"", next:"", crit:"", start:"2026-05-01", end:"2026-06-12"},
+  {id:"A038", phase:"PRE", area:"Relaciones Laborales", proc:"Proceso de cese TRI", task:"Convenio Movimiento Credicorp. Envío de archivo a GDH", resp:"Relaciones Laborales", prio:"Media", status:"En curso", pct:"50%", dep:"", risk:"", next:"Envío de documentación 25/05", crit:"", start:"2026-05-26", end:"2026-05-29"},
+  {id:"A039", phase:"LIVE", area:"Relaciones Laborales", proc:"Proceso de cese TRI", task:"Proceso de Cese nómina TRI: flujo y fechas para solicitud LBS", resp:"RRLL + GDH", prio:"Alta", status:"En curso", pct:"25%", dep:"", risk:"", next:"", crit:"CRÍTICA", start:"2026-05-25", end:"2026-06-15"},
+  {id:"A040", phase:"PRE", area:"Relaciones Laborales", proc:"Proceso de cese TRI", task:"Proceso de traspaso de AFP - validar quiénes aplican y registrar flujo", resp:"RRLL + Mobility", prio:"Media", status:"En curso", pct:"25%", dep:"", risk:"", next:"", crit:"", start:"2026-05-25", end:"2026-05-29"},
+  {id:"A041", phase:"PRE", area:"Compensaciones", proc:"Simulaciones individuales", task:"Solicitud Calculadoras modalidad TRI con visa y sin visa", resp:"Mobility", prio:"Alta", status:"Completada", pct:"100%", dep:"", risk:"", next:"", crit:"", start:"2026-04-01", end:"2026-05-15"},
+  {id:"A042", phase:"PRE", area:"Compensaciones", proc:"Diseño de CTA y bandas", task:"Lineamientos nueva CTA TOPs, MM y colaboradores (TRI → local BR)", resp:"Compensaciones", prio:"Alta", status:"En curso", pct:"95%", dep:"", risk:"", next:"Reunión 28/05 para confirmar fechas", crit:"CRÍTICA", start:"2026-04-15", end:"2026-06-12"},
+  {id:"A043", phase:"PRE", area:"Compensaciones", proc:"Simulaciones individuales", task:"Aprobación de simulaciones de CTA individuales (ambos segmentos)", resp:"Compensaciones", prio:"Media", status:"En curso", pct:"75%", dep:"Revisar pagos comprometidos y migración a la nueva empresa", risk:"Alerta tipo de cambio y comunicación", next:"Reunión 28/05", crit:"", start:"2026-05-01", end:"2026-06-15"},
+  {id:"A044", phase:"PRE", area:"Compensaciones", proc:"Carta oferta y comunicación", task:"Modelo Carta Oferta - modalidad TRI LOCAL (validar con RRLL)", resp:"Compensaciones", prio:"Media", status:"En curso", pct:"50%", dep:"", risk:"", next:"RRLL envió recomendaciones 26/05", crit:"", start:"2026-05-01", end:"2026-06-15"},
+  {id:"A045", phase:"PRE", area:"Liderazgo / Gobierno", proc:"Change management", task:"Change Management: alinear stakeholders (mensajes, timing, lineamientos)", resp:"Mobility + Stakeholders", prio:"Media", status:"En curso", pct:"30%", dep:"", risk:"", next:"Reunión con Cristina de Yape para validar mensajes", crit:"", start:"2026-05-01", end:"2026-06-30"},
+  {id:"A046", phase:"PRE", area:"Beneficios", proc:"Seguro salud y benefits locales", task:"Seguro de Salud Global (Brasil): propuesta con Broker GC + dependientes", resp:"Beneficios", prio:"Alta", status:"En curso", pct:"70%", dep:"", risk:"", next:"", crit:"", start:"2026-05-01", end:"2026-06-30"},
+  {id:"A047", phase:"PRE", area:"Beneficios", proc:"Seguro salud y benefits locales", task:"Bono de salud TRI: definir hasta qué fecha se pagará", resp:"Beneficios", prio:"Alta", status:"En curso", pct:"50%", dep:"", risk:"", next:"", crit:"", start:"2026-05-01", end:"2026-06-30"},
+  {id:"A048", phase:"PRE", area:"Beneficios", proc:"Seguro salud y benefits locales", task:"Propuesta beneficios local Brasil: revisión locales vs corporativos", resp:"Beneficios", prio:"Media", status:"En curso", pct:"35%", dep:"", risk:"", next:"", crit:"", start:"2026-05-01", end:"2026-06-30"},
+  {id:"A049", phase:"PRE", area:"Beneficios", proc:"Comunicación de beneficios", task:"Confirmación propuesta de valor (beneficios nómina TRI LOCAL)", resp:"Beneficios", prio:"Media", status:"En curso", pct:"35%", dep:"", risk:"", next:"", crit:"", start:"2026-05-15", end:"2026-06-30"},
+  {id:"A050", phase:"PRE", area:"Cumplimiento / SST", proc:"Políticas internas (LGPD, conducta)", task:"Políticas internas (LGPD, conducta, acoso, diversidad, plan salud/dental)", resp:"Cumplimiento", prio:"Media", status:"En curso", pct:"25%", dep:"", risk:"", next:"", crit:"", start:"2026-05-01", end:"2026-07-31"},
+  {id:"A051", phase:"LIVE", area:"Cumplimiento / SST", proc:"Capacitaciones obligatorias", task:"Coordinar y validar capacitación con SST", resp:"Cumplimiento", prio:"Baja", status:"Pendiente", pct:"0%", dep:"", risk:"", next:"", crit:"", start:"2026-07-01", end:"2026-08-15"},
+  {id:"A052", phase:"PRE", area:"Operaciones / Nómina", proc:"Contabilidad y reportería", task:"Validar propuestas de proveedores locales para gestión contable y tributaria", resp:"Martha Huapaya / María José Espantoso", prio:"Media", status:"En curso", pct:"50%", dep:"Daniel Villavicencio", risk:"", next:"", crit:"", start:"2026-05-01", end:"2026-06-30"},
+  {id:"A053", phase:"PRE", area:"Operaciones / Nómina", proc:"Contabilidad y reportería", task:"Fiscalización y Reportería: procesos y Conciliación Contable", resp:"Contabilidad", prio:"Media", status:"En curso", pct:"20%", dep:"Proveedor externo + Gestión de Holdings", risk:"Funcionamiento del Hub", next:"Reunión con Martha Huapaya + Billy 29/05", crit:"Importante", start:"2026-05-01", end:"2026-07-15"},
+  {id:"A054", phase:"PRE", area:"Operaciones / Nómina", proc:"Servicios al empleado", task:"Tarjetas Corporativas: validación de uso y proceso para el Hub", resp:"GDH + RRLL", prio:"Media", status:"En curso", pct:"50%", dep:"", risk:"", next:"", crit:"", start:"2026-05-22", end:"2026-06-30"},
+  {id:"A055", phase:"PRE", area:"Operaciones / Nómina", proc:"Contabilidad y reportería", task:"Contabilidad: tipos de reportes por empresa y traslado al proveedor de nómina", resp:"Contabilidad", prio:"Alta", status:"En curso", pct:"35%", dep:"Planeamiento, Gestión de Holdings", risk:"", next:"Reunión con Martha Huapaya + Billy 29/05", crit:"Importante", start:"2026-05-22", end:"2026-05-29"},
+  {id:"A056", phase:"PRE", area:"Operaciones / Nómina", proc:"Servicios al empleado", task:"Misiones: proceso y lineamientos, propuesta para el Hub", resp:"Gestión de misiones", prio:"Media", status:"En curso", pct:"25%", dep:"Relevar impacto política, registro, contable/nómina", risk:"", next:"Reunión 27/05 con Ana Sofía y Pedro N", crit:"", start:"2026-05-21", end:"2026-06-30"},
+  {id:"A057", phase:"LIVE", area:"Operaciones / Nómina", proc:"Proceso de nómina mensual", task:"Pago de nómina: proceso, validación interna y flujo de aprobaciones", resp:"Lu / Proveedor nómina / Mario, Su", prio:"Alta", status:"En curso", pct:"35%", dep:"", risk:"", next:"", crit:"CRÍTICA", start:"2026-05-21", end:"2026-07-15"},
+  {id:"A058", phase:"LIVE", area:"Operaciones / Nómina", proc:"Proceso de nómina mensual", task:"Cronograma de pagos de Nómina + flujo", resp:"Proveedor / GDH", prio:"Alta", status:"Pendiente", pct:"0%", dep:"", risk:"", next:"", crit:"", start:"2026-06-01", end:"2026-07-15"},
+  {id:"A059", phase:"LIVE", area:"Operaciones / Nómina", proc:"Proceso de nómina mensual", task:"Testing de nómina (Julio, previo al Go Live)", resp:"Proveedor / GDH", prio:"Media", status:"Pendiente", pct:"0%", dep:"", risk:"", next:"", crit:"CRÍTICA", start:"2026-07-01", end:"2026-07-31"},
+  {id:"A060", phase:"PRE", area:"Compensaciones", proc:"Diseño de CTA y bandas", task:"T2V: validar en nómina TRI si hay talentos (bono especial)", resp:"Desempeño Yape", prio:"Media", status:"En curso", pct:"35%", dep:"Desempeño Yape / Compensaciones", risk:"No registro de bono o premio adicional", next:"Cristina/Andrea validan lista 28/05", crit:"", start:"2026-05-21", end:"2026-06-15"},
+  {id:"A061", phase:"PRE", area:"Liderazgo / Gobierno", proc:"Gobierno y modelo operativo", task:"TOPs Modelo de atención: relevar procesos/información con cada área", resp:"GDH / Proveedor de Nómina", prio:"Media", status:"Pendiente", pct:"0%", dep:"", risk:"Modelo de atención de los Tops", next:"Agendar Ali, Su y validar procesos del TOP", crit:"", start:"2026-06-01", end:"2026-06-30"},
+  {id:"A062", phase:"PRE", area:"Cumplimiento / SST", proc:"Políticas internas (LGPD, conducta)", task:"Cumplimiento: DDJJ + políticas internas - validar aplicabilidad en BR", resp:"Enrique Dedekind / Renato Martínez", prio:"Media", status:"En curso", pct:"25%", dep:"", risk:"", next:"Pendiente contactar a Renato", crit:"", start:"2026-05-21", end:"2026-07-15"},
+  {id:"A063", phase:"PRE", area:"Liderazgo / Gobierno", proc:"Gobierno y modelo operativo", task:"Flujos operativos de todas las áreas: armar y validar", resp:"Stakeholders", prio:"Media", status:"En curso", pct:"20%", dep:"", risk:"", next:"", crit:"CRÍTICA", start:"2026-05-21", end:"2026-06-30"},
+  {id:"A064", phase:"LIVE", area:"Operaciones / Nómina", proc:"Alta operativa en Finnova", task:"Proceso de Alta en Finnova (traspaso y nuevos): registrar proceso TRI + nuevos", resp:"Proveedor / GDH", prio:"Media", status:"Pendiente", pct:"0%", dep:"", risk:"", next:"Alinear con proveedor y GDH", crit:"", start:"2026-06-15", end:"2026-07-15"},
+  {id:"A065", phase:"LIVE", area:"Beneficios", proc:"Seguro salud y benefits locales", task:"Examen médico preocupacional en Brasil: coordinar proceso y contratación", resp:"Pendiente", prio:"Media", status:"Pendiente", pct:"0%", dep:"Pamela Valdez / Reclutamiento / Beneficios", risk:"", next:"Contactar área que pueda ayudar en la gestión", crit:"", start:"2026-06-15", end:"2026-07-15"},
+  {id:"A066", phase:"PRE", area:"Operaciones / Nómina", proc:"Servicios al empleado", task:"Mesa de Partes Local BR: validar con Veirano/proveedor", resp:"Veirano / Pryor", prio:"Media", status:"Pendiente", pct:"0%", dep:"", risk:"", next:"", crit:"", start:"2026-05-21", end:"2026-06-30"},
+  {id:"A067", phase:"PRE", area:"Legal / Societario", proc:"Contratos con proveedores", task:"Contratos proveedores: matriz de evaluación con alertas y resumen", resp:"Legales", prio:"Alta", status:"En curso", pct:"50%", dep:"Augusto Leguía - no tiene matriz", risk:"", next:"Se envió 26/05 contrato modelo a Pryor", crit:"", start:"2026-05-21", end:"2026-06-30"},
+  {id:"A068", phase:"PRE", area:"Legal / Societario", proc:"Contratos con proveedores", task:"Contrato proveedores: SLA, penalidades, niveles de servicio (revisión vs Culqui)", resp:"Legales", prio:"Alta", status:"En curso", pct:"50%", dep:"Legales", risk:"", next:"Se envió 26/05 contrato modelo a Pryor", crit:"", start:"2026-05-21", end:"2026-06-30"},
+  {id:"A069", phase:"PRE", area:"Legal / Societario", proc:"Contratos con proveedores", task:"Contratación de proveedores externos: registro y proceso de riesgos NF", resp:"Riesgos no Financieros / Gestión de Proveedores", prio:"Alta", status:"En curso", pct:"45%", dep:"", risk:"", next:"", crit:"", start:"2026-05-28", end:"2026-06-30"},
+  {id:"A070", phase:"PRE", area:"Operaciones / Nómina", proc:"Proceso de nómina mensual", task:"Gestión de información confidencial con Proveedores: flujo y validaciones", resp:"GDH, Nómina", prio:"Alta", status:"Pendiente", pct:"0%", dep:"", risk:"", next:"", crit:"CRÍTICA", start:"2026-06-01", end:"2026-06-30"},
+  {id:"A071", phase:"PRE", area:"Tecnología / TI", proc:"Setup de sistemas (SIGA/SAP)", task:"Check Point de TI: envío de recordatorio miércoles", resp:"Mobility", prio:"Media", status:"En curso", pct:"25%", dep:"", risk:"", next:"", crit:"", start:"2026-05-21", end:"2026-05-26"},
+  {id:"A072", phase:"PRE", area:"Tecnología / TI", proc:"Setup de sistemas (SIGA/SAP)", task:"Seguimiento equipo SIGA (subdivisión, códigos puesto/función)", resp:"Mobility + TI", prio:"Alta", status:"En curso", pct:"50%", dep:"", risk:"", next:"", crit:"CRÍTICA", start:"2026-04-15", end:"2026-06-30"},
+  {id:"A073", phase:"PRE", area:"Tecnología / TI", proc:"Accesos y matrices de rol", task:"Accesos y migración: revisión próximos pasos entre Alex O. y Tomás F.", resp:"Tomás Fernández, Arturo Seminario / Alex O.", prio:"Media", status:"En curso", pct:"35%", dep:"", risk:"", next:"", crit:"CRÍTICA", start:"2026-05-01", end:"2026-06-30"},
+  {id:"A074", phase:"PRE", area:"Tecnología / TI", proc:"Accesos y matrices de rol", task:"Matrices de Rol: relevo completo de accesos nómina TRI", resp:"Ronny Ruiz", prio:"Media", status:"En curso", pct:"40%", dep:"", risk:"", next:"", crit:"", start:"2026-05-01", end:"2026-06-30"},
+  {id:"A075", phase:"PRE", area:"Tecnología / TI", proc:"Equipamiento y migración", task:"Proceso de migración de información con equipos de TI", resp:"TI", prio:"Media", status:"En curso", pct:"25%", dep:"", risk:"", next:"", crit:"", start:"2026-05-15", end:"2026-06-30"},
+  {id:"A076", phase:"PRE", area:"Tecnología / TI", proc:"Equipamiento y migración", task:"Solicitud a GDH del listado de equipos propios/empresa (Mac u otros)", resp:"Mobility", prio:"Media", status:"En curso", pct:"25%", dep:"", risk:"", next:"Se contactó a Emilio Hinostroza", crit:"", start:"2026-05-15", end:"2026-06-15"},
+  {id:"A077", phase:"PRE", area:"Tecnología / TI", proc:"Setup de sistemas (SIGA/SAP)", task:"Solicitud PMO a Yvania y equipo - status con Arturo S.", resp:"TI", prio:"Alta", status:"En curso", pct:"70%", dep:"TI", risk:"", next:"Reunión 26/05 confirmación Robert Llerena", crit:"", start:"2026-05-15", end:"2026-06-15"},
+  {id:"A078", phase:"LIVE", area:"Cumplimiento / SST", proc:"Capacitaciones obligatorias", task:"Gerencia de Aprendizaje: cursos/capacitaciones obligatorias", resp:"Claudia Noriega / José Luis Mendoza", prio:"Media", status:"Pendiente", pct:"0%", dep:"Andrea Pitolo", risk:"", next:"Relevar cómo está en Yape", crit:"", start:"2026-06-15", end:"2026-08-15"},
+  {id:"A079", phase:"LIVE", area:"Operaciones / Nómina", proc:"Proceso de nómina mensual", task:"Implementación sistema control de tiempo, horas extras y banco de horas", resp:"Proveedor + Nómina CG", prio:"Media", status:"Pendiente", pct:"0%", dep:"", risk:"", next:"", crit:"", start:"2026-07-01", end:"2026-08-15"},
+  {id:"A080", phase:"LIVE", area:"Operaciones / Nómina", proc:"Alta operativa en Finnova", task:"Obtener documentación del empleado (CPF)", resp:"Proveedor externo", prio:"Media", status:"Pendiente", pct:"0%", dep:"", risk:"", next:"", crit:"", start:"2026-06-15", end:"2026-07-15"},
+  {id:"A081", phase:"LIVE", area:"Operaciones / Nómina", proc:"Alta operativa en Finnova", task:"Apertura/registro de cuenta FGTS en banco CAIXA", resp:"Proveedor externo", prio:"Media", status:"Pendiente", pct:"0%", dep:"", risk:"", next:"", crit:"", start:"2026-06-15", end:"2026-07-15"},
+  {id:"A082", phase:"LIVE", area:"Operaciones / Nómina", proc:"Alta operativa en Finnova", task:"Inscripción/identificación en seguridad social (PIS/PASEP)", resp:"Proveedor externo", prio:"Media", status:"Pendiente", pct:"0%", dep:"", risk:"", next:"", crit:"", start:"2026-06-15", end:"2026-07-15"},
+  {id:"A083", phase:"LIVE", area:"Relaciones Laborales", proc:"Proceso de alta CLT", task:"Firma de contrato de trabajo con los colaboradores", resp:"RRLL / Operational Support", prio:"Media", status:"Pendiente", pct:"0%", dep:"", risk:"", next:"", crit:"", start:"2026-07-01", end:"2026-07-31"},
+  {id:"A084", phase:"LIVE", area:"Relaciones Laborales", proc:"Proceso de alta CLT", task:"Entrega de documentos complementarios (formatos + políticas)", resp:"RRLL / Operational Support", prio:"Media", status:"Pendiente", pct:"0%", dep:"", risk:"", next:"", crit:"", start:"2026-07-01", end:"2026-07-31"},
+  {id:"A085", phase:"LIVE", area:"Relaciones Laborales", proc:"Marco laboral y sindical", task:"Firma de Acuerdo de incentivo para sindicalización", resp:"Proveedor externo", prio:"Media", status:"Pendiente", pct:"0%", dep:"", risk:"", next:"", crit:"", start:"2026-07-01", end:"2026-07-31"},
+  {id:"A086", phase:"LIVE", area:"Operaciones / Nómina", proc:"Alta operativa en Finnova", task:"Inscripción CTPS Digital y envío para examen", resp:"Pendiente", prio:"Media", status:"Pendiente", pct:"0%", dep:"", risk:"", next:"", crit:"", start:"2026-06-15", end:"2026-07-15"},
+  {id:"A087", phase:"POST", area:"Cumplimiento / SST", proc:"Salud y seguridad ocupacional", task:"Provisión de mobiliario ergonómico", resp:"Cumplimiento", prio:"Media", status:"Completada", pct:"35%", dep:"", risk:"", next:"", crit:"", start:"2026-07-15", end:"2026-08-15"},
+  {id:"A088", phase:"POST", area:"Cumplimiento / SST", proc:"Salud y seguridad ocupacional", task:"E-Social: S-2210 CAT, S-2220 Salud Ocup., S-2240 Cond. ambientales", resp:"Cumplimiento", prio:"Media", status:"Completada", pct:"35%", dep:"", risk:"", next:"", crit:"", start:"2026-07-15", end:"2026-08-31"},
+  {id:"A089", phase:"POST", area:"Cumplimiento / SST", proc:"Salud y seguridad ocupacional", task:"Implementación Programa de Control Médico de Salud Ocupacional (PCMSO)", resp:"Cumplimiento", prio:"Media", status:"Completada", pct:"35%", dep:"", risk:"", next:"", crit:"", start:"2026-07-15", end:"2026-08-31"},
+  {id:"A090", phase:"POST", area:"Cumplimiento / SST", proc:"Salud y seguridad ocupacional", task:"Programa de Gestión de Riesgos (reemplazó al PPRA)", resp:"Cumplimiento", prio:"Media", status:"Completada", pct:"35%", dep:"", risk:"", next:"", crit:"", start:"2026-07-15", end:"2026-08-31"},
+  {id:"A091", phase:"POST", area:"Cumplimiento / SST", proc:"Salud y seguridad ocupacional", task:"Admisión, periódica, regreso, cambio de función, baja", resp:"Cumplimiento", prio:"Media", status:"Completada", pct:"35%", dep:"", risk:"", next:"", crit:"", start:"2026-07-15", end:"2026-08-31"},
+  {id:"A092", phase:"POST", area:"Cumplimiento / SST", proc:"Salud y seguridad ocupacional", task:"Informe técnico sobre condiciones ambientales (seguridad social)", resp:"Cumplimiento", prio:"Media", status:"Completada", pct:"35%", dep:"", risk:"", next:"", crit:"", start:"2026-07-15", end:"2026-08-31"},
+  {id:"A093", phase:"POST", area:"Cumplimiento / SST", proc:"Salud y seguridad ocupacional", task:"Designación CIPA (Comisión Interna Prevención Accidentes)", resp:"Cumplimiento", prio:"Media", status:"Completada", pct:"35%", dep:"", risk:"", next:"", crit:"", start:"2026-07-15", end:"2026-08-31"},
+  {id:"A094", phase:"POST", area:"Cumplimiento / SST", proc:"Capacitaciones obligatorias", task:"Capacitaciones NR-01, NR-05 (CIPA), NR-17 (Ergonomía TI)", resp:"Cumplimiento", prio:"Media", status:"Completada", pct:"35%", dep:"", risk:"", next:"", crit:"", start:"2026-07-15", end:"2026-08-31"},
+  {id:"A095", phase:"POST", area:"Cumplimiento / SST", proc:"Capacitaciones obligatorias", task:"Capacitación en Normas Internas, Políticas y Procedimientos Operativos", resp:"Cumplimiento", prio:"Media", status:"Completada", pct:"35%", dep:"", risk:"", next:"", crit:"", start:"2026-07-15", end:"2026-08-31"}
+];
+
+// Mapa de bloqueos: BLOCKS[src] = [ids que la tienen como bloqueante]
+const BLOCKS = {"A010": ["A008", "A009", "A012", "A017", "A018", "A063", "A082", "A083", "A084", "A085"], "A007": ["A009", "A010"], "A011": ["A010"], "A004": ["A009", "A010", "A016"], "A016": ["A017", "A018"], "A008": ["A023", "A057", "A058"], "A025": ["A035", "A065", "A066"], "A026": ["A067"], "A042": ["A044"], "A071": ["A072", "A073"], "A057": ["A059", "A063"], "A038": ["A035", "A065"], "A024": ["A062"], "A067_x": []};
+// Inversa: BLOCKERS[id] = [ids que la bloquean]
+const BLOCKERS = {"A001": [], "A002": [], "A003": [], "A004": [], "A005": [], "A006": [], "A007": [], "A008": ["A010"], "A009": ["A010", "A007", "A004"], "A010": ["A007", "A011", "A004"], "A011": [], "A012": ["A010"], "A013": [], "A014": [], "A015": [], "A016": ["A004"], "A017": ["A010", "A016"], "A018": ["A010", "A016"], "A019": [], "A020": [], "A021": [], "A022": [], "A023": ["A008"], "A024": [], "A025": [], "A026": [], "A027": [], "A028": [], "A029": [], "A030": [], "A031": [], "A032": [], "A033": [], "A034": [], "A035": ["A025", "A038"], "A036": [], "A037": [], "A038": [], "A039": [], "A040": [], "A041": [], "A042": [], "A043": [], "A044": ["A042"], "A045": [], "A046": [], "A047": [], "A048": [], "A049": [], "A050": [], "A051": [], "A052": [], "A053": [], "A054": [], "A055": [], "A056": [], "A057": ["A008"], "A058": ["A008"], "A059": ["A057"], "A060": [], "A061": [], "A062": ["A024"], "A063": ["A010", "A057"], "A064": [], "A065": ["A025", "A038"], "A066": ["A025"], "A067": ["A026"], "A068": [], "A069": [], "A070": [], "A071": [], "A072": ["A071"], "A073": ["A071"], "A074": [], "A075": [], "A076": [], "A077": [], "A078": [], "A079": [], "A080": [], "A081": [], "A082": ["A010"], "A083": ["A010"], "A084": ["A010"], "A085": ["A010"], "A086": [], "A087": [], "A088": [], "A089": [], "A090": [], "A091": [], "A092": [], "A093": [], "A094": [], "A095": []};
+// Tipo de dependencia
+const DEP_TYPE = {"A008": "tarea", "A009": "tarea", "A010": "tarea", "A017": "tarea", "A018": "tarea", "A063": "tarea", "A035": "area", "A044": "tarea", "A072": "tarea", "A073": "tarea", "A059": "tarea", "A057": "area", "A062": "area", "A065": "area", "A066": "area"};
+
+/* ════════ TIMELINE ════════ */
+const TODAY = new Date('2026-05-28T00:00:00');
+const RANGE_START = startOfWeek(new Date('2026-04-13T00:00:00'));
+const RANGE_END = new Date('2026-11-30T00:00:00');
+
+function startOfWeek(d){const x=new Date(d);const day=(x.getDay()+6)%7;x.setDate(x.getDate()-day);x.setHours(0,0,0,0);return x;}
+function parseD(s){return new Date(s+'T00:00:00');}
+function fmtD(d){return d.toISOString().slice(0,10);}
+function weeksBetween(a,b){return Math.round((b-a)/(7*864e5));}
+const WEEKS=[];
+{let c=new Date(RANGE_START);while(c<=RANGE_END){WEEKS.push(new Date(c));c.setDate(c.getDate()+7);}}
+const COLW=46;
+
+/* ════════ FILTER STATE ════════ */
+let FILTERS={phase:new Set(),area:new Set(),proc:new Set(),status:new Set(),crit:false};
+let COLLAPSED=new Set();
+let editingId=null;
+
+function uniq(key){return [...new Set(DATA.map(d=>d[key]).filter(Boolean))];}
+function statusColor(s){return STATUS_MAP[s]||'amber';}
+
+/* ════════ FILTER UI ════════ */
+function renderFilters(){
+  const areas=uniq('area'), procs=uniq('proc'), stats=uniq('status'), phases=['PRE','LIVE','POST'];
+  const f=document.getElementById('filters');
+  f.innerHTML=`
+    <h3>Grupo (Pre / Live / Post)</h3>${phases.map(p=>fopt('phase',p)).join('')}
+    <h3>Áreas</h3>${areas.map(a=>fopt('area',a)).join('')}
+    <h3>Procesos</h3>${procs.map(p=>fopt('proc',p)).join('')}
+    <h3>Status</h3>${stats.map(s=>fopt('status',s,statusColor(s))).join('')}
+    <h3>Ruta crítica</h3>
+    <label class="fopt ${FILTERS.crit?'on':''}"><input type="checkbox" ${FILTERS.crit?'checked':''} onchange="toggleCritOnly()"><span class="sw" style="background:#ee6c2d"></span><span>Solo CRÍTICAS</span></label>
+    <div class="legend">
+      <h3>Owners por área</h3>
+      ${areas.map(a=>`<div class="li" style="line-height:1.35"><div><b style="color:var(--txt);font-size:11px">${esc(a)}</b><br><span style="font-size:10px">${esc(AREA_OWNERS[a]||'—')}</span></div></div>`).join('')}
+    </div>
+    <div class="legend">
+      <h3>Referencias</h3>
+      <div class="li"><span class="dot" style="background:#1f9d57"></span>Completada</div>
+      <div class="li"><span class="dot" style="background:#c98a14"></span>En curso</div>
+      <div class="li"><span class="dot" style="background:#d4453d"></span>Pendiente / Bloqueada</div>
+      <div class="li"><span class="dot" style="background:#6b4ef0"></span>Proceso</div>
+      <div class="li"><span class="dot" style="background:#0fae9e"></span>Área</div>
+      <div class="li"><span class="dot" style="background:#ee6c2d"></span>Ruta crítica</div>
+      <div class="li" style="font-size:10px;color:var(--txt-faint);margin-top:8px;line-height:1.4">Doble clic sobre una barra crítica para ver su cadena de dependencias.</div>
+    </div>`;
+}
+function toggleCritOnly(){FILTERS.crit=!FILTERS.crit;renderFilters();renderGantt();}
+function fopt(group,val,color){
+  const on=FILTERS[group].size===0||FILTERS[group].has(val);
+  const sw=color?`<span class="sw" style="background:var(--${color})"></span>`:'';
+  return `<label class="fopt ${on?'on':''}"><input type="checkbox" ${FILTERS[group].has(val)||FILTERS[group].size===0?'checked':''} onchange="toggleFilter('${group}','${val.replace(/'/g,"\\'")}')">${sw}<span>${val}</span></label>`;
+}
+function toggleFilter(group,val){
+  // build current set from "all selected" baseline
+  let all;
+  if(group==='phase') all=['PRE','LIVE','POST'];
+  else if(group==='area') all=uniq('area');
+  else if(group==='proc') all=uniq('proc');
+  else all=uniq('status');
+  if(FILTERS[group].size===0){FILTERS[group]=new Set(all);}
+  if(FILTERS[group].has(val))FILTERS[group].delete(val);else FILTERS[group].add(val);
+  if(FILTERS[group].size===all.length)FILTERS[group].clear();
+  renderFilters();renderGantt();
+}
+function passFilter(d){
+  if(FILTERS.phase.size&&!FILTERS.phase.has(d.phase))return false;
+  if(FILTERS.area.size&&!FILTERS.area.has(d.area))return false;
+  if(FILTERS.proc.size&&!FILTERS.proc.has(d.proc))return false;
+  if(FILTERS.status.size&&!FILTERS.status.has(d.status))return false;
+  if(FILTERS.crit&&d.crit!=='CRÍTICA')return false;
+  return true;
+}
+
+/* ════════ TREE BUILD: Fase ▸ Área ▸ Proceso ▸ Actividad ════════ */
+function buildTree(){
+  const rows=DATA.filter(passFilter);
+  const phases={};
+  rows.forEach(r=>{
+    phases[r.phase]=phases[r.phase]||{name:r.phase,areas:{}};
+    const ph=phases[r.phase];
+    ph.areas[r.area]=ph.areas[r.area]||{name:r.area,procs:{}};
+    const ar=ph.areas[r.area];
+    ar.procs[r.proc]=ar.procs[r.proc]||{name:r.proc,tasks:[]};
+    ar.procs[r.proc].tasks.push(r);
+  });
+  // Sort phases in order PRE, LIVE, POST
+  const order={PRE:0,LIVE:1,POST:2};
+  return Object.values(phases).sort((a,b)=>(order[a.name]??9)-(order[b.name]??9));
+}
+function span(tasks){
+  const s=Math.min(...tasks.map(t=>parseD(t.start)));
+  const e=Math.max(...tasks.map(t=>parseD(t.end)));
+  return {s:new Date(s),e:new Date(e)};
+}
+
+/* ════════ RENDER GANTT ════════ */
+function renderGantt(){
+  const tree=buildTree();
+  const g=document.getElementById('gantt');
+  if(!tree.length){g.innerHTML='<div class="empty">Sin tareas que coincidan con los filtros.<br>Ajustá los filtros o cargá información nueva.</div>';return;}
+
+  const months=[];
+  WEEKS.forEach((w,i)=>{
+    const key=w.toLocaleDateString('es',{month:'short',year:'2-digit'});
+    if(!months.length||months[months.length-1].key!==key)months.push({key,n:1,i});
+    else months[months.length-1].n++;
+  });
+
+  let head=`<div class="ghead"><div class="gcorner">Proceso / Tarea</div><div class="gmonths">
+    <div class="gmonth-row">${months.map(m=>`<div class="gmonth" style="width:${m.n*COLW}px">${m.key}</div>`).join('')}</div>
+    <div class="gweek-row">${WEEKS.map(w=>{const t=isTodayWeek(w);return `<div class="gweek ${t?'today':''}">${w.getDate()}/${w.getMonth()+1}</div>`}).join('')}</div>
+  </div></div>`;
+
+  let body='<div class="gbody">';
+  tree.forEach(ph=>{
+    const allT=Object.values(ph.areas).flatMap(a=>Object.values(a.procs).flatMap(p=>p.tasks));
+    const ps=span(allT);
+    body+=rowHTML({type:'phase',id:'PH:'+ph.name,label:phaseLabel(ph.name),phaseName:ph.name,start:ps.s,end:ps.e,barClass:'b-phase',collapsed:COLLAPSED.has('PH:'+ph.name)});
+    if(COLLAPSED.has('PH:'+ph.name))return;
+    Object.values(ph.areas).forEach(ar=>{
+      const allAT=Object.values(ar.procs).flatMap(p=>p.tasks);
+      const ars=span(allAT);
+      const aid='AR:'+ph.name+'|'+ar.name;
+      body+=rowHTML({type:'area',id:aid,label:ar.name+'  ·  '+ownerOfArea(ar.name),phaseName:ph.name,areaName:ar.name,start:ars.s,end:ars.e,barClass:'b-area',collapsed:COLLAPSED.has(aid)});
+      if(COLLAPSED.has(aid))return;
+      Object.values(ar.procs).forEach(pr=>{
+        const prs=span(pr.tasks);
+        const pid='PR:'+ph.name+'|'+ar.name+'|'+pr.name;
+        body+=rowHTML({type:'proc',id:pid,label:pr.name,sub:ar.name,phaseName:ph.name,areaName:ar.name,procName:pr.name,start:prs.s,end:prs.e,barClass:'b-proc',collapsed:COLLAPSED.has(pid)});
+        if(COLLAPSED.has(pid))return;
+        pr.tasks.forEach(t=>{
+          body+=rowHTML({type:'task',id:t.id,label:t.task,resp:t.resp,status:t.status,start:parseD(t.start),end:parseD(t.end),barClass:'b-'+statusColor(t.status),raw:t});
+        });
+      });
+    });
+  });
+  body+='</div>';
+  g.innerHTML=`<div class="gtable">${head}${body}</div>`;
+  drawToday();
+  attachBarDrag();
+}
+
+function critOfPhase(tasks){
+  if(tasks.some(t=>statusColor(t.status)==='red'))return 'red';
+  if(tasks.some(t=>statusColor(t.status)==='amber'))return 'amber';
+  return 'green';
+}
+function isTodayWeek(w){const e=new Date(w);e.setDate(e.getDate()+7);return TODAY>=w&&TODAY<e;}
+
+function rowHTML(o){
+  const x=weeksBetween(RANGE_START,o.start)*COLW;
+  const w=Math.max(weeksBetween(o.start,o.end),0.6)*COLW+COLW*0.5;
+  const cls=o.type==='phase'?'row-phase':o.type==='area'?'row-area':o.type==='proc'?'row-proc':'row-task';
+  const isLeaf=o.type==='task';
+  const caretCls=isLeaf?'caret leaf':('caret'+(o.collapsed?' collapsed':''));
+  const caretClick=isLeaf?'':`onclick="toggleCollapse('${o.id.replace(/'/g,"\\'")}')"`;
+  let badge='';
+  if(o.type==='task'){
+    const raw=DATA.find(d=>d.id===o.id)||{};
+    const sc=statusColor(o.status);
+    const critBadge=raw.crit==='CRÍTICA'?'<span class="critbadge" title="Ruta crítica">CRÍT</span>':'';
+    const pctBadge=raw.pct?`<span class="pctbadge">${raw.pct}</span>`:'';
+    badge=`${critBadge}${pctBadge}<span class="sbadge sb-${sc}">${o.status}</span><span class="resp" title="${esc(o.resp||'')}">${esc(o.resp||'')}</span>`;
+  }
+  // label click + edit icon
+  let labelClick='', editIco='';
+  if(o.type==='phase'){
+    const pn=o.phaseName.replace(/'/g,"\\'");
+    labelClick=`onclick="openPhaseEditor('${pn}')"`;
+    editIco=`<span class="edit-ico" onclick="openPhaseEditor('${pn}')" title="Editar grupo">✎</span>`;
+  }else if(o.type==='area'){
+    const pn=o.phaseName.replace(/'/g,"\\'"), an=o.areaName.replace(/'/g,"\\'");
+    labelClick=`onclick="openAreaEditor('${pn}','${an}')"`;
+    editIco=`<span class="edit-ico" onclick="openAreaEditor('${pn}','${an}')" title="Editar área">✎</span>`;
+  }else if(o.type==='proc'){
+    const pn=o.phaseName.replace(/'/g,"\\'"), an=(o.areaName||'').replace(/'/g,"\\'"), prn=o.procName.replace(/'/g,"\\'");
+    labelClick=`onclick="openProcEditor('${pn}','${an}','${prn}')"`;
+    editIco=`<span class="edit-ico" onclick="openProcEditor('${pn}','${an}','${prn}')" title="Editar proceso">✎</span>`;
+  }
+  const barLabel=o.type==='task'?o.label:'';
+  const isCrit=o.type==='task' && (DATA.find(d=>d.id===o.id)||{}).crit==='CRÍTICA';
+  const taskClick=o.type==='task'?`onclick="openEditor('${o.id}')" ondblclick="openCriticalPanel('${o.id}')"`:'';
+  const barExtra=isCrit?' bar-crit':'';
+  const cells=WEEKS.map(wk=>`<div class="gcell ${isTodayWeek(wk)?'today':''}"></div>`).join('');
+  return `<div class="grow ${cls}" data-id="${o.id}">
+    <div class="gside">
+      <span class="${caretCls}" ${caretClick}>▾</span>
+      <span class="sidelabel" ${labelClick} title="${esc(o.label)}">${esc(o.label)}</span>
+      ${editIco}
+      ${badge}
+    </div>
+    <div class="gtrack">${cells}
+      <div class="bar ${o.barClass}${barExtra}" data-barid="${o.id}" ${taskClick}
+        style="left:${x}px;width:${w}px" title="${esc(o.label)} · ${fmtD(o.start)} → ${fmtD(o.end)}${isCrit?' · CRÍTICA (doble clic)':''}">
+        ${o.type==='task'?'<div class="grip l"></div>':''}
+        <span style="overflow:hidden;text-overflow:ellipsis">${esc(barLabel)}</span>
+        ${o.type==='task'?'<div class="grip r"></div>':''}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* Etiqueta de grupo PRE/LIVE/POST */
+function phaseLabel(p){
+  if(p==='PRE')return 'PRE · Antes del Go-Live';
+  if(p==='LIVE')return 'LIVE · Go-Live y traspaso';
+  if(p==='POST')return 'POST · Post-launch y cumplimiento continuo';
+  return p;
+}
+
+/* Owners por área (inferido del Excel) */
+const AREA_OWNERS = {
+  'Liderazgo / Gobierno':'Billy Aperrigue + Stakeholders',
+  'Legal / Societario':'Veirano + Legal CCP',
+  'Finanzas / Holdings':'Billy Aperrigue',
+  'Relaciones Laborales':'Ceci / Ale (RRLL)',
+  'Compensaciones':'Compensaciones (Mobility)',
+  'Beneficios':'Beneficios (Elizabeth/Cinthia)',
+  'Tecnología / TI':'Tomás Fernández + Arturo Seminario',
+  'Operaciones / Nómina':'Proveedor + GDH (Mario / Susana)',
+  'Cumplimiento / SST':'Cumplimiento (Dedekind / Martínez)',
+  'Recruitment':'(sin asignar — área disponible)'
+};
+function ownerOfArea(a){ return AREA_OWNERS[a] || ''; }
+
+function drawToday(){
+  const x=( (TODAY-RANGE_START)/(7*864e5) )*COLW;
+  const tbl=document.querySelector('.gtable');
+  if(!tbl)return;
+  const ln=document.createElement('div');
+  ln.className='today-line';
+  ln.style.left=(380+x)+'px';
+  ln.style.height=tbl.scrollHeight+'px';
+  tbl.appendChild(ln);
+}
+
+function toggleCollapse(id){if(COLLAPSED.has(id))COLLAPSED.delete(id);else COLLAPSED.add(id);renderGantt();}
+function collapseAll(){
+  buildTree().forEach(ph=>{
+    COLLAPSED.add('PH:'+ph.name);
+    Object.entries(ph.areas).forEach(([an,ar])=>{
+      COLLAPSED.add('AR:'+ph.name+'|'+an);
+      Object.keys(ar.procs).forEach(pn=>COLLAPSED.add('PR:'+ph.name+'|'+an+'|'+pn));
+    });
+  });
+  renderGantt();
+}
+function expandAll(){COLLAPSED.clear();renderGantt();}
+
+/* ════════ DRAG BARS (mover + resize) ════════ */
+function attachBarDrag(){
+  document.querySelectorAll('.bar.b-green,.bar.b-amber,.bar.b-red').forEach(bar=>{
+    const id=bar.dataset.barid;const t=DATA.find(d=>d.id===id);if(!t)return;
+    let mode=null,sx=0,os=0,oe=0;
+    const onDown=(e,m)=>{e.stopPropagation();mode=m;sx=e.clientX;os=weeksBetween(RANGE_START,parseD(t.start));oe=weeksBetween(RANGE_START,parseD(t.end));document.addEventListener('mousemove',onMove);document.addEventListener('mouseup',onUp);e.preventDefault();};
+    const onMove=e=>{
+      const dw=Math.round((e.clientX-sx)/COLW);
+      let ns=os,ne=oe;
+      if(mode==='move'){ns=os+dw;ne=oe+dw;}
+      if(mode==='l'){ns=Math.min(os+dw,oe-1);}
+      if(mode==='r'){ne=Math.max(oe+dw,os+1);}
+      const sD=new Date(RANGE_START);sD.setDate(sD.getDate()+ns*7);
+      const eD=new Date(RANGE_START);eD.setDate(eD.getDate()+ne*7);
+      bar.style.left=weeksBetween(RANGE_START,sD)*COLW+'px';
+      bar.style.width=(Math.max(weeksBetween(sD,eD),0.6)*COLW+COLW*0.5)+'px';
+      bar._ns=fmtD(sD);bar._ne=fmtD(eD);
+    };
+    const onUp=()=>{document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);if(bar._ns){t.start=bar._ns;t.end=bar._ne;renderGantt();}};
+    bar.addEventListener('mousedown',e=>{if(!e.target.classList.contains('grip'))onDown(e,'move');});
+    bar.querySelector('.grip.l')?.addEventListener('mousedown',e=>onDown(e,'l'));
+    bar.querySelector('.grip.r')?.addEventListener('mousedown',e=>onDown(e,'r'));
+  });
+}
+
+/* ════════ COMBO: elegir existente o escribir nuevo ════════ */
+function comboField(idBase,label,current,options){
+  const opts=[...new Set(options.filter(Boolean))];
+  const inList=opts.includes(current);
+  const selOpts=opts.map(o=>`<option value="${esc(o)}" ${o===current?'selected':''}>${esc(o)}</option>`).join('');
+  return `<div class="fld"><label>${label}</label>
+    <div class="combo">
+      <select id="${idBase}_sel" onchange="comboSel('${idBase}')">
+        ${selOpts}
+        <option value="__new__" ${!inList?'selected':''}>➕ Nuevo…</option>
+      </select>
+      <input id="${idBase}_new" placeholder="Escribí un nombre nuevo" value="${!inList?esc(current):''}" style="display:${!inList?'block':'none'}">
+    </div></div>`;
+}
+function comboSel(idBase){
+  const sel=document.getElementById(idBase+'_sel');
+  const inp=document.getElementById(idBase+'_new');
+  if(sel.value==='__new__'){inp.style.display='block';inp.focus();}
+  else{inp.style.display='none';}
+}
+function comboVal(idBase){
+  const sel=document.getElementById(idBase+'_sel');
+  if(sel.value==='__new__'){return document.getElementById(idBase+'_new').value.trim();}
+  return sel.value;
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+/* ════════ EDITOR DE TAREA / ACTIVIDAD ════════ */
+function openEditor(id){
+  editingId=id;const t=DATA.find(d=>d.id===id);if(!t)return;
+  document.getElementById('edTitle').textContent='Editar actividad · '+t.id;
+  document.getElementById('edBody').innerHTML=`
+    <div class="ed-section">Contenido</div>
+    <div class="fld"><label>Actividad</label><textarea id="e_task">${esc(t.task)}</textarea></div>
+    <div class="fld"><label>Responsable / Owner</label><input id="e_resp" value="${esc(t.resp||'')}"></div>
+
+    <div class="ed-section">Ubicación en el Gantt</div>
+    <div class="note-box">Podés mover esta actividad a otro grupo (PRE/LIVE/POST), área o proceso eligiendo uno existente del listado o creando uno nuevo con “➕ Nuevo…”.</div>
+    ${comboField('e_phase','Grupo (PRE / LIVE / POST)',t.phase,['PRE','LIVE','POST'])}
+    ${comboField('e_area','Área',t.area,uniq('area'))}
+    ${comboField('e_proc','Proceso',t.proc,uniq('proc'))}
+
+    <div class="ed-section">Plazos, prioridad y estado</div>
+    <div class="fld row2"><div><label>Inicio</label><input type="date" id="e_start" value="${t.start}"></div><div><label>Fin</label><input type="date" id="e_end" value="${t.end}"></div></div>
+    <div class="fld row2">
+      <div><label>Status</label><select id="e_status">${['Completada','En curso','Parcial','Pendiente','Bloqueada'].map(s=>`<option ${s===t.status?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div><label>Prioridad</label><select id="e_prio">${['Alta','Media','Baja'].map(s=>`<option ${s===t.prio?'selected':''}>${s}</option>`).join('')}</select></div>
+    </div>
+    <div class="fld row2">
+      <div><label>% Avance</label><input id="e_pct" value="${esc(t.pct||'')}" placeholder="0%"></div>
+      <div><label>Ruta crítica</label><select id="e_crit">${['','Importante','CRÍTICA'].map(s=>`<option value="${s}" ${s===t.crit?'selected':''}>${s||'—'}</option>`).join('')}</select></div>
+    </div>
+
+    <div class="ed-section">Dependencias y notas</div>
+    <div class="fld"><label>Dependencias (texto libre del Excel)</label><input id="e_dep" value="${esc(t.dep||'')}"></div>
+    <div class="fld"><label>Riesgos</label><textarea id="e_risk">${esc(t.risk||'')}</textarea></div>
+    <div class="fld"><label>Próximos pasos</label><textarea id="e_next">${esc(t.next||'')}</textarea></div>
+
+    <div class="ed-actions">
+      <button class="btn danger" onclick="deleteTask()">Eliminar</button>
+      <button class="btn primary" onclick="saveTask()">Guardar</button>
+    </div>`;
+  document.getElementById('editor').classList.add('open');
+}
+function closeEditor(){document.getElementById('editor').classList.remove('open');editingId=null;clearHighlight();}
+function saveTask(){
+  const t=DATA.find(d=>d.id===editingId);if(!t)return;
+  const ph=comboVal('e_phase')||t.phase;
+  const ar=comboVal('e_area')||t.area;
+  const pr=comboVal('e_proc')||t.proc;
+  t.task=val('e_task');t.phase=ph;t.area=ar;t.proc=pr;
+  t.resp=val('e_resp');t.start=val('e_start');t.end=val('e_end');t.status=val('e_status');
+  t.prio=val('e_prio');t.pct=val('e_pct');t.crit=val('e_crit');
+  t.dep=val('e_dep');t.risk=val('e_risk');t.next=val('e_next');
+  closeEditor();renderFilters();renderGantt();
+}
+function deleteTask(){DATA=DATA.filter(d=>d.id!==editingId);closeEditor();renderFilters();renderGantt();}
+function val(id){return document.getElementById(id).value.trim();}
+function addTask(){
+  // nuevo ID secuencial Axxx
+  const maxN=Math.max(0,...DATA.map(d=>parseInt((d.id||'').replace(/\D/g,''),10)||0));
+  const nid='A'+String(maxN+1).padStart(3,'0');
+  const phs=['PRE','LIVE','POST'],ars=uniq('area'),prs=uniq('proc');
+  DATA.push({id:nid,phase:phs[0],area:ars[0]||'General',proc:prs[0]||'General',task:'Nueva actividad',resp:'',prio:'Media',pct:'0%',dep:'',risk:'',next:'',crit:'',start:fmtD(TODAY),end:fmtD(new Date(TODAY.getTime()+7*864e5)),status:'Pendiente'});
+  renderFilters();renderGantt();openEditor(nid);
+}
+
+/* ════════ EDITOR DE GRUPO PRE/LIVE/POST ════════ */
+function openPhaseEditor(phaseName){
+  editingId=null;
+  document.getElementById('edTitle').textContent='Editar grupo';
+  const count=DATA.filter(d=>d.phase===phaseName).length;
+  document.getElementById('edBody').innerHTML=`
+    <div class="ed-section">Grupo (PRE / LIVE / POST)</div>
+    <div class="note-box">Este grupo agrupa <b>${count}</b> actividad(es). Renombrarlo actualiza todas sus actividades. También podés fusionar con otro grupo existente.</div>
+    ${comboField('p_name','Nombre / fusionar con',phaseName,['PRE','LIVE','POST'])}
+    <div class="ed-actions">
+      <button class="btn danger" onclick="deletePhase('${esc(phaseName)}')">Eliminar</button>
+      <button class="btn primary" onclick="savePhase('${esc(phaseName)}')">Guardar</button>
+    </div>`;
+  document.getElementById('editor').classList.add('open');
+}
+function savePhase(oldName){
+  const nn=comboVal('p_name').trim();if(!nn)return;
+  DATA.forEach(d=>{if(d.phase===oldName)d.phase=nn;});
+  closeEditor();renderFilters();renderGantt();
+}
+function deletePhase(name){
+  if(!confirm('¿Eliminar el grupo "'+name+'" y todas sus actividades?'))return;
+  DATA=DATA.filter(d=>d.phase!==name);closeEditor();renderFilters();renderGantt();
+}
+
+/* ════════ EDITOR DE ÁREA ════════ */
+function openAreaEditor(phaseName,areaName){
+  editingId=null;
+  document.getElementById('edTitle').textContent='Editar área';
+  const rows=DATA.filter(d=>d.phase===phaseName&&d.area===areaName);
+  document.getElementById('edBody').innerHTML=`
+    <div class="ed-section">Área</div>
+    <div class="note-box">Esta área agrupa <b>${rows.length}</b> actividad(es) dentro del grupo <b>${esc(phaseName)}</b>. Podés renombrarla, moverla a otro grupo, o fusionar con otra área existente.</div>
+    ${comboField('ar_name','Nombre del área / fusionar',areaName,uniq('area'))}
+    ${comboField('ar_phase','Grupo (PRE / LIVE / POST)',phaseName,['PRE','LIVE','POST'])}
+    <div class="fld"><label>Owner del área (memoria de la app)</label><input id="ar_owner" value="${esc(AREA_OWNERS[areaName]||'')}"></div>
+    <div class="ed-actions">
+      <button class="btn danger" onclick="deleteArea('${esc(phaseName)}','${esc(areaName)}')">Eliminar</button>
+      <button class="btn primary" onclick="saveArea('${esc(phaseName)}','${esc(areaName)}')">Guardar</button>
+    </div>`;
+  document.getElementById('editor').classList.add('open');
+}
+function saveArea(oldPhase,oldArea){
+  const nName=comboVal('ar_name').trim()||oldArea;
+  const nPhase=comboVal('ar_phase').trim()||oldPhase;
+  const nOwner=val('ar_owner');
+  DATA.forEach(d=>{
+    if(d.phase===oldPhase&&d.area===oldArea){
+      d.area=nName; d.phase=nPhase;
+    }
+  });
+  if(nOwner) AREA_OWNERS[nName]=nOwner;
+  if(nName!==oldArea) delete AREA_OWNERS[oldArea];
+  closeEditor();renderFilters();renderGantt();
+}
+function deleteArea(phaseName,areaName){
+  if(!confirm('¿Eliminar el área "'+areaName+'" y sus actividades en este grupo?'))return;
+  DATA=DATA.filter(d=>!(d.phase===phaseName&&d.area===areaName));
+  closeEditor();renderFilters();renderGantt();
+}
+
+/* ════════ EDITOR DE PROCESO ════════ */
+function openProcEditor(phaseName,areaName,procName){
+  editingId=null;
+  document.getElementById('edTitle').textContent='Editar proceso';
+  const rows=DATA.filter(d=>d.phase===phaseName&&d.area===areaName&&d.proc===procName);
+  document.getElementById('edBody').innerHTML=`
+    <div class="ed-section">Proceso</div>
+    <div class="note-box">Este proceso agrupa <b>${rows.length}</b> actividad(es) en el área <b>${esc(areaName)}</b> del grupo <b>${esc(phaseName)}</b>. Podés renombrarlo, moverlo a otra área o grupo, o fusionar con otro proceso.</div>
+    ${comboField('pr_name','Nombre del proceso / fusionar',procName,uniq('proc'))}
+    ${comboField('pr_area','Área',areaName,uniq('area'))}
+    ${comboField('pr_phase','Grupo (PRE / LIVE / POST)',phaseName,['PRE','LIVE','POST'])}
+    <div class="ed-actions">
+      <button class="btn danger" onclick="deleteProc('${esc(phaseName)}','${esc(areaName)}','${esc(procName)}')">Eliminar</button>
+      <button class="btn primary" onclick="saveProc('${esc(phaseName)}','${esc(areaName)}','${esc(procName)}')">Guardar</button>
+    </div>`;
+  document.getElementById('editor').classList.add('open');
+}
+function saveProc(oldPhase,oldArea,oldProc){
+  const nName=comboVal('pr_name').trim()||oldProc;
+  const nArea=comboVal('pr_area').trim()||oldArea;
+  const nPhase=comboVal('pr_phase').trim()||oldPhase;
+  DATA.forEach(d=>{
+    if(d.phase===oldPhase&&d.area===oldArea&&d.proc===oldProc){
+      d.proc=nName; d.area=nArea; d.phase=nPhase;
+    }
+  });
+  closeEditor();renderFilters();renderGantt();
+}
+function deleteProc(phaseName,areaName,procName){
+  if(!confirm('¿Eliminar el proceso "'+procName+'" y todas sus actividades?'))return;
+  DATA=DATA.filter(d=>!(d.phase===phaseName&&d.area===areaName&&d.proc===procName));
+  closeEditor();renderFilters();renderGantt();
+}
+
+/* ════════ RUTA CRÍTICA · Panel + resaltado de cadena ════════ */
+function openCriticalPanel(id){
+  const t=DATA.find(d=>d.id===id);if(!t)return;
+  editingId=null;
+  // Quién la bloquea, qué desbloquea, tipo
+  const blockedBy=(BLOCKERS[id]||[]).map(x=>DATA.find(d=>d.id===x)).filter(Boolean);
+  const unblocks=(BLOCKS[id]||[]).map(x=>DATA.find(d=>d.id===x)).filter(Boolean);
+  const allChain=new Set([id,...blockedBy.map(x=>x.id),...unblocks.map(x=>x.id)]);
+  highlightChain(allChain);
+
+  const depKind=DEP_TYPE[id]||(blockedBy.length?'tarea':'-');
+  document.getElementById('edTitle').textContent='Ruta crítica · '+t.id;
+  document.getElementById('edBody').innerHTML=`
+    <div class="ed-section">Actividad crítica</div>
+    <div class="crit-card">
+      <div class="crit-row"><span class="crit-lab">Actividad</span><b>${esc(t.task)}</b></div>
+      <div class="crit-row"><span class="crit-lab">Grupo · Área · Proceso</span>${esc(t.phase)} · ${esc(t.area)} · ${esc(t.proc)}</div>
+      <div class="crit-row"><span class="crit-lab">Owner</span>${esc(t.resp)}</div>
+      <div class="crit-row"><span class="crit-lab">Status · Avance</span><span class="sbadge sb-${statusColor(t.status)}">${t.status}</span> · ${esc(t.pct||'—')}</div>
+      <div class="crit-row"><span class="crit-lab">Plazo</span>${t.start} → <b>${t.end}</b></div>
+    </div>
+
+    <div class="ed-section">Tipo de dependencia</div>
+    <div class="note-box">
+      ${blockedBy.length===0 ? 'No tiene <b>dependencias internas</b> registradas. La criticidad viene del <b>impacto que tiene río abajo</b> (mirá "Desbloquea").'
+        : `Dependencia identificada: <b>${depKind==='area'?'de ÁREA':'de TAREA / actividad'}</b>. ${depKind==='area'?'Espera la habilitación de otra área entera.':'Espera tareas concretas listadas abajo.'}`}
+    </div>
+
+    <div class="ed-section">Qué la bloquea</div>
+    ${blockedBy.length===0?'<div class="empty-mini">— sin bloqueos directos —</div>':blockedBy.map(b=>`
+      <div class="chain-card" onclick="openCriticalPanel('${b.id}')">
+        <div class="chain-top"><span class="chain-id">${b.id}</span><span class="sbadge sb-${statusColor(b.status)}">${b.status}</span></div>
+        <div class="chain-task">${esc(b.task)}</div>
+        <div class="chain-meta">${esc(b.area)} · ${esc(b.resp||'—')}</div>
+      </div>`).join('')}
+
+    <div class="ed-section">Qué desbloquea</div>
+    ${unblocks.length===0?'<div class="empty-mini">— no desbloquea otras actividades del mapa —</div>':unblocks.map(b=>`
+      <div class="chain-card" onclick="openCriticalPanel('${b.id}')">
+        <div class="chain-top"><span class="chain-id">${b.id}</span><span class="sbadge sb-${statusColor(b.status)}">${b.status}</span>${b.crit==='CRÍTICA'?' <span class="critbadge">CRÍT</span>':''}</div>
+        <div class="chain-task">${esc(b.task)}</div>
+        <div class="chain-meta">${esc(b.area)} · ${esc(b.resp||'—')}</div>
+      </div>`).join('')}
+
+    <div class="ed-section">Riesgos y próximos pasos</div>
+    <div class="fld"><label>Riesgo</label><div class="ro">${esc(t.risk)||'—'}</div></div>
+    <div class="fld"><label>Próximo paso</label><div class="ro">${esc(t.next)||'—'}</div></div>
+
+    <div class="ed-actions">
+      <button class="btn" onclick="openEditor('${t.id}')">Editar actividad</button>
+      <button class="btn primary" onclick="closeEditor()">Cerrar</button>
+    </div>`;
+  document.getElementById('editor').classList.add('open');
+}
+function highlightChain(set){
+  clearHighlight();
+  set.forEach(id=>{
+    const bar=document.querySelector(`.bar[data-barid="${id}"]`);
+    if(bar)bar.classList.add('chain-hi');
+    const row=document.querySelector(`.grow[data-id="${id}"]`);
+    if(row)row.classList.add('chain-hi');
+  });
+}
+function clearHighlight(){
+  document.querySelectorAll('.chain-hi').forEach(el=>el.classList.remove('chain-hi'));
+}
+
+/* ════════ IMPORT ════════ */
+function openImport(){document.getElementById('importModal').classList.add('open');}
+function closeImport(){document.getElementById('importModal').classList.remove('open');}
+function parseImport(){
+  const txt=document.getElementById('importText').value.trim();if(!txt)return [];
+  return txt.split(/\r?\n/).map(line=>{
+    const c=line.split(/\t|,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(s=>s.replace(/^"|"$/g,'').trim());
+    if(c.length<5)return null;
+    const today=fmtD(TODAY), wk=fmtD(new Date(TODAY.getTime()+7*864e5));
+    return {id:c[0]||Math.random().toFixed(3),phase:c[1]||'FASE 0',area:c[2]||'—',proc:c[3]||'—',task:c[4]||'(sin nombre)',resp:c[5]||'',dep:c[6]||'',start:c[7]||today,end:c[8]||wk,status:c[10]||'Pendiente'};
+  }).filter(Boolean);
+}
+function appendImport(){const n=parseImport();if(n.length){DATA=DATA.concat(n);renderFilters();renderGantt();}closeImport();}
+function replaceImport(){const n=parseImport();if(n.length){DATA=n;FILTERS={area:new Set(),proc:new Set(),status:new Set()};renderFilters();renderGantt();}closeImport();}
+
+/* ════════ INIT ════════ */
+renderFilters();
+renderGantt();
+</script>
+</body>
+</html>
